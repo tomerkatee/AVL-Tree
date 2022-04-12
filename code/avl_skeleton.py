@@ -15,7 +15,7 @@ class AVLNode(object):
     @param value: data of your node
     """
 
-    def __init__(self, value, parent=None):
+    def __init__(self, value=None, parent=None):
         self.value = value
         self.parent = parent
         if value is None:
@@ -28,6 +28,8 @@ class AVLNode(object):
             self.size = 1
             self.left = AVLNode(None, self)
             self.right = AVLNode(None, self)
+            if parent is None:
+                self.parent = AVLNode()
 
 
 
@@ -150,6 +152,12 @@ class AVLNode(object):
     def set_size(self, size):
         self.size = size
 
+    def setSizeBySons(self):
+        self.set_size(1 + self.getRight().size + self.getLeft().size)
+
+    def setHeightAndSizeBySons(self):
+        self.setSizeBySons()
+        self.setHeightBySons()
 
     """returns the size
 
@@ -174,7 +182,7 @@ class AVLTreeList(object):
     """
 
     def __init__(self):
-        self.root = None
+        self.root = AVLNode()
 
     # add your fields here
 
@@ -197,7 +205,8 @@ class AVLTreeList(object):
     """
 
     def retrieve(self, i):
-        return self.select(i+1).val
+        if 0 <= i < self.length():
+            return self.select(i + 1).val
 
     def select(self, i):
         return AVLTreeList.select_from_subtree(self.root, i)
@@ -226,34 +235,35 @@ class AVLTreeList(object):
 
     def insert(self, i, val):
         if 0 <= i <= self.length():
-            if self.root is None:
+            if self.length() == 0:
                 self.root = AVLNode(val)
                 return 0
-            next = AVLTreeList.select_from_subtree(self.root, i + 1)
+            next = self.select(i + 1)
             if (next.getLeft() is not None) and (not next.getLeft().isRealNode()):  # meaning that next has no left son
                 next.setLeft(AVLNode(val, next))
                 self.root, rot_cnt = AVLTreeList.fix_tree(next)
                 return rot_cnt
             else:
-                predecessor = AVLTreeList.select_from_subtree(self.root, i)
+                predecessor = self.select(i)
                 predecessor.setRight(AVLNode(val, predecessor))
+                if not predecessor.isRealNode():
+                    predecessor = self.select(i + 1)
                 self.root, rot_cnt = AVLTreeList.fix_tree(predecessor)
                 return rot_cnt
-
 
 
     @staticmethod
     def fix_tree(node: AVLNode):
         rot_cnt = 0
-        while node is not None:
+        while node.isRealNode():
             new_root = node
             if abs(node.getBalanceFactor()) > 1:
                 AVLTreeList.perform_rotation(node)
                 rot_cnt += 1
-            node.set_size(1 + node.getRight().size + node.getLeft().size)
-            node.setHeightBySons()
+            node.setHeightAndSizeBySons()
             node = node.getParent()
         return new_root, rot_cnt
+
 
     @staticmethod
     def perform_rotation(node: AVLNode):
@@ -268,6 +278,7 @@ class AVLTreeList(object):
             else:
                 AVLTreeList.rotate_left(node)
 
+
     @staticmethod
     def rotate_right(father_node: AVLNode):
         left = father_node.getLeft()
@@ -276,13 +287,13 @@ class AVLTreeList(object):
         left.setRight(father_node)
         left.setParent(father_node.getParent())
         father_node.setParent(left)
-        if left.getParent() is not None:
-            if left.getParent().getRight() == father_node:
-                left.getParent().setRight(left)
-            else:
-                left.getParent().setLeft(left)
-        father_node.setHeightBySons()
-        left.setHeightBySons()
+        if left.getParent().getRight() == father_node:
+            left.getParent().setRight(left)
+        else:
+            left.getParent().setLeft(left)
+        father_node.setHeightAndSizeBySons()
+        left.setHeightAndSizeBySons()
+
 
     @staticmethod
     def rotate_left_then_right(father_node: AVLNode):
@@ -297,14 +308,14 @@ class AVLTreeList(object):
         leftRight.setLeft(left)
         leftRight.setRight(father_node)
         father_node.setParent(leftRight)
-        if leftRight.getParent is not None:
-            if leftRight.getParent().getRight() == father_node:
-                leftRight.getParent().setRight(leftRight)
-            else:
-                leftRight.getParent().setLeft(leftRight)
-        left.setHeightBySons()
-        father_node.setHeightBySons()
-        leftRight.setHeightBySons()
+        if leftRight.getParent().getRight() == father_node:
+            leftRight.getParent().setRight(leftRight)
+        else:
+            leftRight.getParent().setLeft(leftRight)
+        left.setHeightAndSizeBySons()
+        father_node.setHeightAndSizeBySons()
+        leftRight.setHeightAndSizeBySons()
+
 
     @staticmethod
     def rotate_left(father_node: AVLNode):
@@ -314,13 +325,13 @@ class AVLTreeList(object):
         right.setLeft(father_node)
         right.setParent(father_node.getParent())
         father_node.setParent(right)
-        if right.getParent() is not None:
-            if right.getParent().getLeft() == father_node:
-                right.getParent().setLeft(right)
-            else:
-                right.getParent().setRight(right)
-        father_node.setHeightBySons()
-        right.setHeightBySons()
+        if right.getParent().getLeft() == father_node:
+            right.getParent().setLeft(right)
+        else:
+            right.getParent().setRight(right)
+        father_node.setHeightAndSizeBySons()
+        right.setHeightAndSizeBySons()
+
 
     @staticmethod
     def rotate_right_then_left(father_node: AVLNode):
@@ -335,15 +346,13 @@ class AVLTreeList(object):
         rightLeft.setRight(right)
         rightLeft.setLeft(father_node)
         father_node.setParent(rightLeft)
-        if rightLeft.getParent() is not None:
-            if rightLeft.getParent().getLeft() == father_node:
-                rightLeft.getParent().setLeft(rightLeft)
-            else:
-                rightLeft.getParent().setRight(rightLeft)
-        right.setHeightBySons()
-        father_node.setHeightBySons()
-        rightLeft.setHeightBySons()
-
+        if rightLeft.getParent().getLeft() == father_node:
+            rightLeft.getParent().setLeft(rightLeft)
+        else:
+            rightLeft.getParent().setRight(rightLeft)
+        right.setHeightAndSizeBySons()
+        father_node.setHeightAndSizeBySons()
+        rightLeft.setHeightAndSizeBySons()
 
 
     @staticmethod
@@ -433,7 +442,7 @@ class AVLTreeList(object):
     """
 
     def last(self):
-        return None
+        return self.retrieve(self.length - 1)
 
     """returns an array representing list 
 
@@ -451,7 +460,7 @@ class AVLTreeList(object):
     """
 
     def length(self):
-        return self.root.getSize()
+        return 0 if self.getRoot() is None else self.root.getSize()
 
     """splits the list at the i'th index
 
@@ -475,7 +484,33 @@ class AVLTreeList(object):
     """
 
     def concat(self, lst):
-        return None
+        height_diff = self.root.getHeight() - lst.root.getHeight()
+        x = self.select(self.length())
+        self.delete(self.length() - 1)
+        if self.root.getHeight() > lst.root.getHeight():
+            b = self.root
+            while b.getHeight() > lst.root.getHeight():
+                b = b.getRight()
+            x.setParent(b.getParent())
+            x.getParent().setRight(x)
+            b.setParent(x)
+            x.setLeft(b)
+            x.setRight(lst.root)
+            lst.root.setParent(x)
+            self.root, rot_cnt = self.fix_tree(x)
+        else:
+            b = lst.root
+            while b.getHeight() > self.root.getHeight():
+                b = b.getLeft()
+            x.setParent(b.getParent())
+            x.getParent().setLeft(x)
+            b.setParent(x)
+            x.setRight(b)
+            x.setLeft(self.root)
+            self.root.setParent(x)
+            self.root, rot_cnt = self.fix_tree(x)
+        return abs(height_diff)
+
 
     """searches for a *value* in the list
 
@@ -495,6 +530,6 @@ class AVLTreeList(object):
     """
 
     def getRoot(self):
-        return self.root
+        return self.root if self.root.isRealNode() else None
 
 
