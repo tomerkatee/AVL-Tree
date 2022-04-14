@@ -210,7 +210,7 @@ class AVLTreeList(object):
 
     def retrieve(self, i):
         if 0 <= i < self.length():
-            return self.select(i + 1).val
+            return self.select(i + 1).getValue()
 
     def select(self, i):
         return AVLTreeList.select_from_subtree(self.root, i)
@@ -454,7 +454,7 @@ class AVLTreeList(object):
     """
 
     def last(self):
-        return self.retrieve(self.length - 1)
+        return self.retrieve(self.length() - 1)
 
     """returns an array representing list 
 
@@ -463,7 +463,16 @@ class AVLTreeList(object):
     """
 
     def listToArray(self):
-        return None
+        list_of_element = []
+        def listToArray_rec(root):
+            if root:
+                listToArray_rec(root.left)
+                if root.isRealNode():
+                    list_of_element.append(root.getValue())
+                listToArray_rec(root.right)
+        listToArray_rec(self.root)
+        return list_of_element
+
 
     """returns the size of the list 
 
@@ -558,7 +567,12 @@ class AVLTreeList(object):
     """
 
     def search(self, val):
-        return None
+        list_of_values = self.listToArray()
+        for i in range(len(list_of_values)):
+            if list_of_values[i] == val:
+                return i
+        return -1
+
 
     """returns the root of the tree representing the list
 
