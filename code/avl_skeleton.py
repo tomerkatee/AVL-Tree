@@ -611,9 +611,9 @@ class AVLTreeList(object):
     """
 
     def concat(self, lst):
-        selfHeight = 0 if self.root is None else self.root.getHeight()
-        lstHeight = 0 if lst.root is None else lst.root.getHeight()
-        height_diff = selfHeight - lstHeight
+        selfHeight = -1 if self.root is None else self.root.getHeight()
+        lstHeight = -1 if lst.root is None else lst.root.getHeight()
+        height_diff = abs(selfHeight - lstHeight)
         if lst.empty():     # treating empty-tree corner cases
             return height_diff
         if self.empty():
@@ -650,7 +650,7 @@ class AVLTreeList(object):
             max_node.setLeft(self.root)
             self.root.setParent(max_node)
             self.root, rot_cnt = self.fix_tree(max_node)
-        return abs(height_diff)
+        return height_diff
 
     """searches for a *value* in the list
     complexity: O(n)
