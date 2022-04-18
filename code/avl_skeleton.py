@@ -21,13 +21,13 @@ class AVLNode(object):
 
     def __init__(self, value=None, parent=None, virtual=False):
         self.parent = parent
-        if virtual:         # creating a virtual node
+        if virtual:  # creating a virtual node
             self.value = None
             self.height = -1
             self.size = 0
             self.left = None
             self.right = None
-        else:               # creating a normal node with virtual sons
+        else:  # creating a normal node with virtual sons
             self.value = value
             self.height = 0
             self.size = 1
@@ -64,6 +64,7 @@ class AVLNode(object):
 
     @rtype: bool
     """
+
     def hasParent(self):
         return self.parent is not None
 
@@ -203,6 +204,7 @@ class AVLTreeList(object):
         else:
             self.root = root
 
+
     # add your fields here
 
     """returns whether the list is empty
@@ -225,7 +227,7 @@ class AVLTreeList(object):
 
     def retrieve(self, i):
         if 0 <= i < self.length():
-            return self.select(i + 1).getValue()    # select the relevant node reference and return its value
+            return self.select(i + 1).getValue()  # select the relevant node reference and return its value
 
     """selects the node of rank i in the rank tree representing the list
 
@@ -234,20 +236,22 @@ class AVLTreeList(object):
     @rtype: AVLNode
     @returns: reference to the node of rank i, or the last node's right virtual son if non existent.
     """
+
     def select(self, i):
         if not self.empty():
             return AVLTreeList.select_from_subtree(self.root, i)
 
     """selects the node of rank i in the given subtree
-    
+
     @comp: O(log(n))
     @type i: int
     @param i: rank in the subtree
     @rtype: AVLNode
     @returns: reference to the node of rank i, or the last node's right virtual son if non existent.
     """
+
     @staticmethod
-    def select_from_subtree(node, i):   # implements select on a rank tree as taught in class
+    def select_from_subtree(node, i):  # implements select on a rank tree as taught in class
         if not node.isRealNode():
             return node
         if node.getLeft().getSize() + 1 == i:
@@ -273,37 +277,36 @@ class AVLTreeList(object):
             if self.empty():
                 self.root = AVLNode(val)
                 return 0
-            next = self.select(i + 1)   # selecting the current node of rank i+1 which will become rank i+2
+            next = self.select(i + 1)  # selecting the current node of rank i+1 which will become rank i+2
             if (next.getLeft() is not None) and (not next.getLeft().isRealNode()):  # meaning that next has no left son
                 next.setLeft(AVLNode(val, next))
-                self.root, rot_cnt = AVLTreeList.fix_tree(next)
-                return rot_cnt
-            else:   # next has a left son so we insert to the right of node i
+                return self.fix_tree(next)
+            else:  # next has a left son so we insert to the right of node i
                 predecessor = self.select(i)
                 predecessor.setRight(AVLNode(val, predecessor))
-                self.root, rot_cnt = AVLTreeList.fix_tree(predecessor)
-                return rot_cnt
+                return self.fix_tree(predecessor)
 
     """inserts a new node with the given value at the end of the list"""
+
     def insert_last(self, val):
         self.insert(self.length(), val)
 
     """inserts a new node with the given value at the beginning of the list"""
+
     def insert_first(self, val):
         self.insert(0, val)
 
-
     """ fixes the tree by rotations and size/height sets to maintain AVL rank tree properties from a given start node
     complexity: O(log(n))
-    
+
     @pre: node is not None
     @type node: AVLNode
     @param node: the node to begin fixing from, climbing upwards to the root
-    @rtype: tuple
-    @returns: a tuple containing the new root of the fixed tree and the number of rotations needed to maintain AVL balance.
+    @rtype: int
+    @returns: the number of rotations needed to maintain AVL balance.
     """
-    @staticmethod
-    def fix_tree(node: AVLNode):
+
+    def fix_tree(self, node: AVLNode):
         rot_cnt = 0
         while node is not None:
             new_root = node
@@ -312,14 +315,16 @@ class AVLTreeList(object):
                 rot_cnt += 1
             node.setHeightAndSizeBySons()
             node = node.getParent()
-        return new_root, rot_cnt
+        self.root = new_root
+        return rot_cnt
 
     """ performs a rotation on the given node according to its balance factor (as taught in class)
-    
+
     @pre: node is not None
     @type node: AVLNode
     @param node: the node on which we rotate
     """
+
     @staticmethod
     def perform_rotation(node: AVLNode):
         if node.getBalanceFactor() == 2:
@@ -411,13 +416,14 @@ class AVLTreeList(object):
 
     """returns the predecessor of the given node
     complexity: O(log(n))
-    
+
     @pre: node.isRealNode() == True
     @type node: AVLNode
     @param node: the node of which we return the predecessor
     @rtype: AVLNode
     @returns: a reference to the predecessor
     """
+
     @staticmethod
     def predecessor(node):
         if node.getLeft().isRealNode():
@@ -430,13 +436,14 @@ class AVLTreeList(object):
 
     """returns the successor of the given node
     complexity: O(log(n))
-    
+
     @pre: node.isRealNode() == True
     @type node: AVLNode
     @param node: the node of which we return the successor
     @rtype: AVLNode
     @returns: a reference to the successor
     """
+
     @staticmethod
     def successor(node):
         if node.getRight().isRealNode():
@@ -448,7 +455,7 @@ class AVLTreeList(object):
         return parent
 
     """ returns the leftmost offspring of the given node
-    
+
     @pre node.isRealNode() == True
     @type node: AVLNode
     @param node: the node of which we return the leftmost offspring
@@ -463,7 +470,7 @@ class AVLTreeList(object):
         return node
 
     """ returns the rightmost offspring of the given node
-    
+
     @pre node.isRealNode() == True
     @type node: AVLNode
     @param node: the node of which we return the rightmost offspring
@@ -489,20 +496,22 @@ class AVLTreeList(object):
 
     def delete(self, i):
         if 0 <= i < self.length():
-            target = self.select(i + 1)     # selecting the target of deletion
+            target = self.select(i + 1)  # selecting the target of deletion
             if target.getLeft().isRealNode() and target.getRight().isRealNode():  # if target has two children delete the successor
                 succ = AVLTreeList.successor(target)
                 target.setValue(succ.getValue())
-                target = succ   # now target has only one son or no sons
+                target = succ                       # now target has only one son or no sons
             if target == self.root:
                 if target.getLeft().isRealNode():
                     target.getLeft().setParent(target.getParent())
                     self.root = target.getLeft()
-                else:
+                elif target.getRight().isRealNode():
                     target.getRight().setParent(target.getParent())
                     self.root = target.getRight()
+                else:
+                    self.root = None
                 return 0
-            elif target.getParent().getLeft() == target:        # deleting the successor according to its parent and son
+            elif target.getParent().getLeft() == target:  # deleting the successor according to its parent and son
                 if target.getLeft().isRealNode():
                     target.getParent().setLeft(target.getLeft())
                     target.getLeft().setParent(target.getParent())
@@ -516,8 +525,7 @@ class AVLTreeList(object):
                 else:
                     target.getParent().setRight(target.getRight())
                     target.getRight().setParent(target.getParent())
-            self.root, rot_cnt = self.fix_tree(target.getParent())
-            return rot_cnt
+            return self.fix_tree(target.getParent())
         return -1
 
     """returns the value of the first item in the list
@@ -547,15 +555,16 @@ class AVLTreeList(object):
 
     def listToArray(self):
         list_of_elements = []
+
         def listToArray_rec(root):  # appends to the list all the elements in the tree from left to right "inorder"
             if root:
                 listToArray_rec(root.left)
                 if root.isRealNode():
                     list_of_elements.append(root.getValue())
                 listToArray_rec(root.right)
+
         listToArray_rec(self.root)
         return list_of_elements
-
 
     """returns the size of the list 
 
@@ -578,25 +587,25 @@ class AVLTreeList(object):
     """
 
     def split(self, i):
-        splitter = self.select(i + 1)   # the node that splits the list
+        splitter = self.select(i + 1)  # the node that splits the list
         splitter.getLeft().setParent(None)
         splitter.getRight().setParent(None)
-        small_tree = AVLTreeList(splitter.getLeft())   # tree that will contain the list until the splitter
-        big_tree = AVLTreeList(splitter.getRight())    # tree that will contain the list from the splitter to the end
+        small_tree = AVLTreeList(splitter.getLeft())  # tree that will contain the list until the splitter
+        big_tree = AVLTreeList(splitter.getRight())  # tree that will contain the list from the splitter to the end
         parent = splitter.getParent()
         before = splitter
-        while parent is not None:   # climbing upwards from the splitter to the root
+        while parent is not None:  # climbing upwards from the splitter to the root
             if parent.getRight() == before:  # if we climbed leftwards it means that parent and parent.left are smaller than splitter
                 parent.getLeft().setParent(None)
                 left_subtree = AVLTreeList(parent.getLeft())
                 left_subtree.insert_last(parent.getValue())
-                left_subtree.concat(small_tree)             # adding parent and parent.left to the small tree
+                left_subtree.concat(small_tree)  # adding parent and parent.left to the small tree
                 small_tree = left_subtree
-            else:   # we climbed rightwards than parent and parent.right are bigger than splitter
+            else:  # we climbed rightwards than parent and parent.right are bigger than splitter
                 parent.getRight().setParent(None)
                 right_subtree = AVLTreeList(parent.getRight())
                 big_tree.insert_last(parent.getValue())
-                big_tree.concat(right_subtree)              # adding parent and parent.right to the big tree
+                big_tree.concat(right_subtree)  # adding parent and parent.right to the big tree
             before = parent
             parent = parent.getParent()
         return [small_tree, splitter.getValue(), big_tree]
@@ -614,14 +623,15 @@ class AVLTreeList(object):
         selfHeight = -1 if self.root is None else self.root.getHeight()
         lstHeight = -1 if lst.root is None else lst.root.getHeight()
         height_diff = abs(selfHeight - lstHeight)
-        if lst.empty():     # treating empty-tree corner cases
+        if lst.empty():  # treating empty-tree corner cases
             return height_diff
         if self.empty():
             self.root = lst.root
             return height_diff
-        max_node = self.select(self.length())   # getting the last node that will become the seperator between self and lst
-        self.delete(self.length() - 1)   # deleting the last node from self
-        if self.root is None:   # if self contained only max_node
+        max_node = self.select(
+            self.length())  # getting the last node that will become the seperator between self and lst
+        self.delete(self.length() - 1)  # deleting the last node from self
+        if self.root is None:  # if self contained only max_node
             lst.insert_first(max_node.getValue())
             self.root = lst.getRoot()
         elif self.root.getHeight() > lst.root.getHeight():
@@ -637,8 +647,8 @@ class AVLTreeList(object):
             max_node.setLeft(similar_height_node)
             max_node.setRight(lst.root)
             lst.root.setParent(max_node)
-            self.root, rot_cnt = self.fix_tree(max_node)
-        else:   # the symmetrical action, self and lst switch roles
+            self.fix_tree(max_node)
+        else:  # the symmetrical action, self and lst switch roles
             similar_height_node = lst.root
             while similar_height_node.getHeight() > self.root.getHeight():
                 similar_height_node = similar_height_node.getLeft()
@@ -649,8 +659,8 @@ class AVLTreeList(object):
             max_node.setRight(similar_height_node)
             max_node.setLeft(self.root)
             self.root.setParent(max_node)
-            self.root, rot_cnt = self.fix_tree(max_node)
-        return height_diff
+            self.fix_tree(max_node)
+        return abs(height_diff)
 
     """searches for a *value* in the list
     complexity: O(n)
@@ -668,8 +678,6 @@ class AVLTreeList(object):
                 return i
         return -1
 
-
-
     """returns the root of the tree representing the list
 
     @rtype: AVLNode
@@ -678,4 +686,3 @@ class AVLTreeList(object):
 
     def getRoot(self):
         return self.root
-
