@@ -303,26 +303,32 @@ class AVLTreeList(object):
     @type node: AVLNode
     @param node: the node to begin fixing from, climbing upwards to the root
     @rtype: int
-    @returns: the number of rotations needed to maintain AVL balance.
+    @returns: the number of actions needed to maintain AVL balance and the height field.
     """
 
     def fix_tree(self, node: AVLNode):
-        rot_cnt = 0
+        fix_cnt = 0
         while node is not None:
             new_root = node
+            rotated = False
             if abs(node.getBalanceFactor()) > 1:
-                AVLTreeList.perform_rotation(node)
-                rot_cnt += 1
+                fix_cnt += AVLTreeList.perform_rotation(node)
+                rotated = True
+            height_before = node.getHeight()
             node.setHeightAndSizeBySons()
+            if not rotated and height_before != node.getHeight():
+                fix_cnt += 1
             node = node.getParent()
         self.root = new_root
-        return rot_cnt
+        return fix_cnt
 
     """ performs a rotation on the given node according to its balance factor (as taught in class)
 
     @pre: node is not None
     @type node: AVLNode
     @param node: the node on which we rotate
+    @rtype: int
+    @returns: the number of mini-rotations in the rotation perform
     """
 
     @staticmethod
@@ -330,13 +336,17 @@ class AVLTreeList(object):
         if node.getBalanceFactor() == 2:
             if node.getLeft().getBalanceFactor() == -1:
                 AVLTreeList.rotate_left_then_right(node)
+                return 2
             else:
                 AVLTreeList.rotate_right(node)
+                return 1
         else:
             if node.getRight().getBalanceFactor() == 1:
                 AVLTreeList.rotate_right_then_left(node)
+                return 2
             else:
                 AVLTreeList.rotate_left(node)
+                return 1
 
     @staticmethod
     def rotate_right(father_node: AVLNode):
