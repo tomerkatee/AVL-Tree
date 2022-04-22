@@ -194,6 +194,8 @@ class AVLTreeList(object):
     """
     Constructor, you are allowed to add more fields.
 
+    @param firstVal: the value of the first item in the list, None if empty
+    @param lastVal: the value of the last item in the list, None if empty
     @type root: AVLNode
     @param root: the root node of the new tree, None by default
     """
@@ -443,7 +445,10 @@ class AVLTreeList(object):
     @staticmethod
     def predecessor(node):
         if node.getLeft().isRealNode():
-            return AVLTreeList.subtree_max(node.getLeft())
+            node = node.getLeft()
+            while node.getRight().isRealNode():
+                node = node.getRight()
+            return node
         parent = node.getParent()
         while parent is not None and parent.getRight() != node:
             node = parent
@@ -463,44 +468,15 @@ class AVLTreeList(object):
     @staticmethod
     def successor(node):
         if node.getRight().isRealNode():
-            return AVLTreeList.subtree_min(node.getRight())
+            node = node.getRight()
+            while node.getLeft().isRealNode():
+                node = node.getLeft()
+            return node
         parent = node.getParent()
         while parent is not None and parent.getLeft() != node:
             node = parent
             parent = node.getParent()
         return parent
-
-    """ returns the leftmost offspring of the given node
-    complexity: O(log(n))
-
-    @pre node.isRealNode() == True
-    @type node: AVLNode
-    @param node: the node of which we return the leftmost offspring
-    @rtype: AVLNode
-    @returns: a reference to the leftmost offspring or the node himself if it has no left sons
-    """
-
-    @staticmethod
-    def subtree_min(node):
-        while node.getLeft().isRealNode():
-            node = node.getLeft()
-        return node
-
-    """ returns the rightmost offspring of the given node
-    complexity: O(log(n))
-
-    @pre node.isRealNode() == True
-    @type node: AVLNode
-    @param node: the node of which we return the rightmost offspring
-    @rtype: AVLNode
-    @returns: a reference to the rightmost offspring or the node himself if it has no right sons
-    """
-
-    @staticmethod
-    def subtree_max(node):
-        while node.getRight().isRealNode():
-            node = node.getRight()
-        return node
 
     """deletes the i'th item in the list
     complexity: O(log(n))
