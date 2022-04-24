@@ -1,8 +1,8 @@
 # username - tomerkatee
 # id1      - 214166027
 # name1    - tomer katee
-# id2      - complete info
-# name2    - complete info
+# id2      - 316158898
+# name2    - ella kelner
 
 
 """A class represnting a node in an AVL tree"""
