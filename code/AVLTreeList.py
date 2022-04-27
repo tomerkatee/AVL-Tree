@@ -319,12 +319,12 @@ class AVLTreeList(object):
         while node is not None:
             new_root = node
             rotated=False
-            if abs(node.getBalanceFactor()) > 1:
+            if abs(node.getBalanceFactor()) > 1:    # spotting AVL criminals
                 fix_cnt += AVLTreeList.perform_rotation(node)
                 rotated = True
             height_before = node.getHeight()
             node.setHeightAndSizeBySons()
-            if not rotated and height_before != node.getHeight():
+            if not rotated and height_before != node.getHeight():   # counting height changes
                 fix_cnt += 1
             node = node.getParent()
         self.root = new_root
@@ -356,6 +356,12 @@ class AVLTreeList(object):
                 AVLTreeList.rotate_left(node)
                 return 1
 
+    """perform a right rotation on the given father node
+    
+    @pre father_node is not None
+    @type father_node: AVLNode
+    @param father_node:  represents the AVL criminal node
+    """    
     @staticmethod
     def rotate_right(father_node: AVLNode):
         left = father_node.getLeft()
@@ -372,6 +378,7 @@ class AVLTreeList(object):
         father_node.setHeightAndSizeBySons()
         left.setHeightAndSizeBySons()
 
+    """similar to right_rotation()"""
     @staticmethod
     def rotate_left_then_right(father_node: AVLNode):
         left = father_node.getLeft()
@@ -394,6 +401,7 @@ class AVLTreeList(object):
         father_node.setHeightAndSizeBySons()
         leftRight.setHeightAndSizeBySons()
 
+    """similar to right_rotation()"""
     @staticmethod
     def rotate_left(father_node: AVLNode):
         right = father_node.getRight()
@@ -410,6 +418,7 @@ class AVLTreeList(object):
         father_node.setHeightAndSizeBySons()
         right.setHeightAndSizeBySons()
 
+    """similar to right_rotation()"""
     @staticmethod
     def rotate_right_then_left(father_node: AVLNode):
         right = father_node.getRight()
@@ -494,24 +503,25 @@ class AVLTreeList(object):
             if target.getLeft().isRealNode() and target.getRight().isRealNode():  # if target has two children delete the successor
                 succ = AVLTreeList.successor(target)
                 target.setValue(succ.getValue())
-                target = succ                       # now target has only one son or no sons
+                target = succ                       
+            # now target has only one son or no sons
             if i == 0:
-                succ = AVLTreeList.successor(target)
-                self.firstVal = None if succ is None else succ.getValue()
-            if i == self.length() - 1:
-                pred = AVLTreeList.predecessor(target)
-                self.lastVal = None if pred is None else pred.getValue()
-            if target == self.root:
-                if target.getLeft().isRealNode():
-                    target.getLeft().setParent(None)
-                    self.root = target.getLeft()
-                elif target.getRight().isRealNode():
-                    target.getRight().setParent(None)
-                    self.root = target.getRight()
-                else:
-                    self.root = None
-                return 0
-            elif target.getParent().getLeft() == target:  # deleting the successor according to its parent and son
+                succ = AVLTreeList.successor(target)                        #
+                self.firstVal = None if succ is None else succ.getValue()   #
+            if i == self.length() - 1:                                      # predicting first/lastVal before deletion of first/last node
+                pred = AVLTreeList.predecessor(target)                      #
+                self.lastVal = None if pred is None else pred.getValue()    #
+            if target == self.root:                     #
+                if target.getLeft().isRealNode():       #
+                    target.getLeft().setParent(None)    #
+                    self.root = target.getLeft()        #
+                elif target.getRight().isRealNode():    #
+                    target.getRight().setParent(None)   # deleting root if requested
+                    self.root = target.getRight()       #
+                else:                                   #
+                    self.root = None                    #
+                return 0                                #
+            elif target.getParent().getLeft() == target:    # deleting the successor according to its parent and son
                 if target.getLeft().isRealNode():
                     target.getParent().setLeft(target.getLeft())
                     target.getLeft().setParent(target.getParent())
